@@ -83,6 +83,10 @@
   .st.crit{color:var(--crit)}.st.crit .ic{background:var(--crit)}
 
   .done{color:var(--good-text);font-weight:600}
+  .gloss{margin-top:12px;border-top:1px solid var(--grid);padding-top:10px}
+  .gloss p{font-size:12px;color:var(--ink-2);margin-bottom:8px;line-height:1.5}
+  .gloss p:last-child{margin-bottom:0}
+  .gloss b{color:var(--ink)}
   .pb-item{margin-bottom:14px}
   .pb-item:last-child{margin-bottom:2px}
   .pb-top{display:flex;justify-content:space-between;align-items:baseline;font-size:13px;font-weight:600;margin-bottom:6px}
@@ -179,6 +183,13 @@
         <div class="tile"><div class="label">Хрон. нагрузка</div><div class="value num">366</div><div class="hint">коридор 293–549</div></div>
         <div class="tile"><div class="label">Прогноз ПМ</div><div class="value num">2:03:58</div><div class="hint">Garmin race predictor</div></div>
         <div class="tile"><div class="label">Прогноз марафона</div><div class="value num">4:40:42</div><div class="hint">Garmin race predictor</div></div>
+      </div>
+      <div class="gloss">
+        <p><b>VO₂max</b> — максимальный объём кислорода, который организм способен усвоить за минуту (мл/кг/мин). Главный показатель аэробной выносливости: чем выше, тем быстрее вы бежите на том же пульсе. 48 для вашего возраста — уровень «отличный», растёт медленно, месяцами.</p>
+        <p><b>ЛП (лактатный порог)</b> — пульс, выше которого молочная кислота накапливается быстрее, чем организм успевает её утилизировать. У вас это 159 уд/мин: ниже — можно бежать долго, выше — счёт идёт на минуты. Все тренировочные зоны отстроены от этой цифры.</p>
+        <p><b>ACWR</b> (acute:chronic workload ratio) — отношение нагрузки за последние 7 дней к средней за 4 недели. Показывает, не рванули ли вы резко вверх: 0,8–1,3 — безопасная зона роста, выше 1,5 — риск травмы и перетренированности. Сейчас ~1,3 — верхняя граница нормы, ожидаемо после вчерашней длинной.</p>
+        <p><b>Хроническая нагрузка</b> — накопленная тренировочная база за ~4 недели (условные единицы Garmin). Это ваш «фундамент»: коридор 293–549 — оптимум именно для вашего текущего уровня. 366 — прочно внутри коридора, есть запас для роста объёмов.</p>
+        <p><b>Garmin race predictor</b> — прогноз финишного времени на основе VO₂max и истории тренировок. Точность разумная для ПМ (±3–5 мин), для марафона — скорее ориентир: он не знает про питание, жару и то, как вы переносите дистанции за 30 км.</p>
       </div>
     </div>
 
