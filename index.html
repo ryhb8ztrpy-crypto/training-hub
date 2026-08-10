@@ -83,6 +83,10 @@
   .st.crit{color:var(--crit)}.st.crit .ic{background:var(--crit)}
 
   .done{color:var(--good-text);font-weight:600}
+  tr.today td{background:color-mix(in srgb, var(--accent) 10%, transparent)}
+  tr.today td:first-child{font-weight:700;color:var(--accent-deep)}
+  tr.past td{opacity:.55}
+  .today-mark{display:inline-block;background:var(--accent);color:#fff;border-radius:6px;padding:0 6px;font-size:10px;font-weight:700;margin-left:6px;vertical-align:1px}
   .badge{display:inline-block;background:var(--chip);border-radius:6px;padding:1px 7px;font-size:11px;color:var(--ink-2);font-weight:600}
   .badge.ok{background:var(--good);color:#fff}
 
@@ -174,14 +178,14 @@
       <h2>Неделя 10–16 августа <span class="note">· разгрузка перед пиковой · велогонка отменена</span></h2>
       <table>
         <thead><tr><th>День</th><th>Тренировка</th><th>Цель по ЧСС</th><th></th></tr></thead>
-        <tbody>
-          <tr><td>Пн 10.08</td><td class="done">✅ Длинный 16,0 км — 1:43, ср. ЧСС 134, точно в коридоре</td><td class="num">130–145</td><td><span class="badge ok">сделано</span></td></tr>
-          <tr><td>Вт 11.08</td><td>😴 Полный отдых — recovery time после длинной</td><td>—</td><td></td></tr>
-          <tr><td>Ср 12.08</td><td>🏃 40 мин легко</td><td class="num">125–140</td><td><span class="badge">⌚ в часах</span></td></tr>
-          <tr><td>Чт 13.08</td><td>😴 Отдых</td><td>—</td><td></td></tr>
-          <tr><td>Пт 14.08</td><td>🏃 40 мин легко</td><td class="num">125–140</td><td><span class="badge">⌚ в часах</span></td></tr>
-          <tr><td>Сб 15.08</td><td>😴 Отдых или 🚴 лёгкое вело 60–75 мин Z1–Z2 по желанию</td><td class="num">&lt; 140</td><td></td></tr>
-          <tr><td>Вс 16.08</td><td>🏃 Длинный <b>12–14 км</b> легко, по самочувствию</td><td class="num">130–145</td><td><span class="badge">⌚ в часах</span></td></tr>
+        <tbody id="week-days">
+          <tr data-d="2026-08-10"><td>Пн 10.08</td><td class="done">✅ Длинный 16,0 км — 1:43, ср. ЧСС 134, точно в коридоре</td><td class="num">130–145</td><td><span class="badge ok">сделано</span></td></tr>
+          <tr data-d="2026-08-11"><td>Вт 11.08</td><td>😴 Полный отдых — recovery time после длинной</td><td>—</td><td></td></tr>
+          <tr data-d="2026-08-12"><td>Ср 12.08</td><td>🏃 40 мин легко</td><td class="num">125–140</td><td><span class="badge">⌚ в часах</span></td></tr>
+          <tr data-d="2026-08-13"><td>Чт 13.08</td><td>😴 Отдых</td><td>—</td><td></td></tr>
+          <tr data-d="2026-08-14"><td>Пт 14.08</td><td>🏃 40 мин легко</td><td class="num">125–140</td><td><span class="badge">⌚ в часах</span></td></tr>
+          <tr data-d="2026-08-15"><td>Сб 15.08</td><td>😴 Отдых или 🚴 лёгкое вело 60–75 мин Z1–Z2 по желанию</td><td class="num">&lt; 140</td><td></td></tr>
+          <tr data-d="2026-08-16"><td>Вс 16.08</td><td>🏃 Длинный <b>12–14 км</b> легко, по самочувствию</td><td class="num">130–145</td><td><span class="badge">⌚ в часах</span></td></tr>
         </tbody>
       </table>
       <p style="font-size:12px;color:var(--ink-2);margin-top:10px">📌 Каденс на длинных — 170+, особенно в подъёмы (в пн был ~163). Вечером в вс — первый автоплан пиковой недели 17–23.08.</p>
@@ -266,6 +270,18 @@
     else if(diff===0) el.textContent='сегодня!';
     else el.textContent='прошло';
   });
+  // подсветка текущего дня в таблице недели
+  (function(){
+    const t=new Date(); t.setHours(0,0,0,0);
+    document.querySelectorAll('#week-days tr[data-d]').forEach(tr=>{
+      const d=new Date(tr.dataset.d+'T00:00:00');
+      if(d.getTime()===t.getTime()){
+        tr.classList.add('today');
+        const m=document.createElement('span'); m.className='today-mark'; m.textContent='СЕГОДНЯ';
+        tr.querySelector('td').appendChild(m);
+      } else if(d<t){ tr.classList.add('past'); }
+    });
+  })();
   // manual refresh: очистить кэш SW и перезагрузить
   document.getElementById('refresh').addEventListener('click', async ()=>{
     const btn=document.getElementById('refresh');
