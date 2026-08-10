@@ -75,6 +75,8 @@
   .race.main .name{color:var(--accent-deep)}
   .race .meta{font-size:13px;color:var(--ink-2)}
   .race .count{font-size:12px;font-weight:600;color:var(--accent-deep);white-space:nowrap;margin-top:3px}
+  .race-link{display:inline-block;text-decoration:none;font-size:14px;margin-left:4px;padding:2px 6px;border:1px solid var(--border);border-radius:8px;background:var(--chip);vertical-align:1px}
+  .race-link:active{opacity:.6}
 
   .tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
   .tile{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px 14px}
@@ -184,7 +186,7 @@
           <div class="dot"></div>
           <div class="body">
             <div class="when">7–8 ноября</div>
-            <div class="name">🏆 Марафон — Самарканд 🇺🇿</div>
+            <div class="name">🏆 Марафон — Самарканд 🇺🇿 <a class="race-link" href="https://events.samarkandmarathon.uz/event/SamarkandMarathon2026/" target="_blank" rel="noopener" title="Официальная страница марафона">🌐</a></div>
             <div class="meta">Главный старт года · ориентир 4:30–4:45 (темп 6:20–6:45/км, ЧСС 140–148) · климат ~13°C — идеальный</div>
             <div class="count" data-date="2026-11-07"></div>
           </div>
@@ -251,13 +253,13 @@
       <p class="ch-note">Факт проставляется воскресным автопланом из Garmin. Пики блока — недели 12–18.10 и 19–25.10 (до 60 км).</p>
     </div>
     <div class="card">
-      <h2>HRV за ночь, мс <span class="note">· пунктир — граница базы 38 мс</span></h2>
+      <h2>HRV за ночь, мс <span class="note">· красная линия — граница базы 38 мс, ниже — зона недовосстановления</span></h2>
       <div id="ch-hrv"></div>
       <p class="ch-note">Единичные ночи шумные — смотрим на положение относительно базы. Провал 09.08 — бессонная ночь с малышом; восстановление за сутки: 67 мс уже 10.08.</p>
       <div class="gloss">
         <p><b>Что это.</b> HRV (heart rate variability) — вариабельность пульса: насколько неодинаковы паузы между ударами сердца. Звучит парадоксально, но чем «неровнее» — тем лучше: гибкий ритм означает, что нервная система в режиме восстановления. Ровный, как метроном, пульс — признак стресса или усталости.</p>
         <p><b>Как измеряется.</b> Часы считают HRV во сне; на графике — лучший 5-минутный отрезок ночи в миллисекундах. Это самый чувствительный из ваших ночных показателей: он проседает от недосыпа, болезни, алкоголя, тяжёлой тренировки и стресса раньше, чем вы это почувствуете.</p>
-        <p><b>Как читать.</b> Ваша типичная ночь — 55–80 мс, граница базы — 38 мс (пунктир). Одна низкая ночь ничего не значит (шум, как 09.08 после ночи с малышом). Важен паттерн: 3+ ночей подряд у пунктира или ниже при обычном сне — сигнал накопленной усталости, в такие дни интенсивность отменяется, даже если план говорит иное.</p>
+        <p><b>Как читать.</b> Ваша типичная ночь — 55–80 мс, граница базы — 38 мс (красный пунктир, зона под ним подкрашена). Одна низкая ночь ничего не значит (шум, как 09.08 после ночи с малышом). Важен паттерн: 3+ ночей подряд у пунктира или ниже при обычном сне — сигнал накопленной усталости, в такие дни интенсивность отменяется, даже если план говорит иное.</p>
         <p><b>Абсолютные цифры не сравниваются между людьми</b> — у кого-то база 30, у кого-то 90, это генетика и возраст. Сравнивать себя нужно только с собственной базой.</p>
       </div>
     </div>
@@ -419,11 +421,16 @@
       let s='';
       [40,60,80].forEach(g=>{ if(g>lo&&g<hi){ s+=`<line x1="${padL}" y1="${y(g)}" x2="${W}" y2="${y(g)}" stroke="${css('--grid')}" stroke-width="1"/>`;
         s+=`<text x="${padL-6}" y="${y(g)+4}" text-anchor="end" font-size="11" fill="${css('--muted')}">${g}</text>`; }});
-      s+=`<line x1="${padL}" y1="${y(DYN.hrvBase)}" x2="${W}" y2="${y(DYN.hrvBase)}" stroke="${css('--serious')||'#ec835a'}" stroke-width="1.4" stroke-dasharray="5 4"/>`;
+      // красная зона недовосстановления: всё ниже базы
+      const yb=y(DYN.hrvBase);
+      s+=`<rect x="${padL}" y="${yb}" width="${W-padL}" height="${H-padB-yb}" fill="#d03b3b" opacity="0.09"/>`;
+      s+=`<line x1="${padL}" y1="${yb}" x2="${W}" y2="${yb}" stroke="#d03b3b" stroke-width="1.6" stroke-dasharray="6 4"/>`;
+      s+=`<text x="${W-4}" y="${yb+14}" text-anchor="end" font-size="10" font-weight="600" fill="#d03b3b">ниже — недовосстановление</text>`;
       const pts=data.map((d,i)=>`${x(i)},${y(d.v)}`).join(' ');
       s+=`<polyline points="${pts}" fill="none" stroke="${css('--accent')}" stroke-width="2" stroke-linejoin="round"/>`;
       data.forEach((d,i)=>{
-        s+=`<circle cx="${x(i)}" cy="${y(d.v)}" r="4" fill="${css('--accent')}" stroke="${css('--surface')}" stroke-width="2"><title>${d.d}: ${d.v} мс</title></circle>`;
+        const bad = d.v<=DYN.hrvBase;
+        s+=`<circle cx="${x(i)}" cy="${y(d.v)}" r="4" fill="${bad?'#d03b3b':css('--accent')}" stroke="${css('--surface')}" stroke-width="2"><title>${d.d}: ${d.v} мс${bad?' — у границы / ниже базы':''}</title></circle>`;
         if(i%2===0||i===n-1) s+=`<text x="${x(i)}" y="${H-6}" text-anchor="middle" font-size="10" fill="${css('--muted')}">${d.d}</text>`;
       });
       const last=data[n-1];
