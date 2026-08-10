@@ -1,0 +1,16 @@
+{
+  "name": "Training Hub — путь к Самарканду",
+  "short_name": "Training Hub",
+  "description": "Тренировочный центр: бег, вело, плавание. Старты 2026 и еженедельный план.",
+  "lang": "ru",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#0d0d0d",
+  "theme_color": "#1c5cab",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "icons/icon-512-maskable.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

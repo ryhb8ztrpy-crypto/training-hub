@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/icon-180.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Training Hub">
+<meta name="theme-color" content="#1c5cab">
+<title>Training Hub — путь к Самарканду</title>
+<style>
+  :root{
+    color-scheme: light;
+    --page:#f9f9f7; --surface:#fcfcfb;
+    --ink:#0b0b0b; --ink-2:#52514e; --muted:#898781;
+    --grid:#e1e0d9; --border:rgba(11,11,11,.10);
+    --accent:#2a78d6; --accent-deep:#1c5cab;
+    --good:#0ca30c; --warn:#fab219; --serious:#ec835a; --crit:#d03b3b;
+    --good-text:#006300;
+    --chip:#f0efec;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      color-scheme: dark;
+      --page:#0d0d0d; --surface:#1a1a19;
+      --ink:#ffffff; --ink-2:#c3c2b7; --muted:#898781;
+      --grid:#2c2c2a; --border:rgba(255,255,255,.10);
+      --accent:#3987e5; --accent-deep:#86b6ef;
+      --good-text:#0ca30c;
+      --chip:#383835;
+    }
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:system-ui,-apple-system,"Segoe UI",sans-serif;background:var(--page);color:var(--ink);line-height:1.45;padding:20px 16px 48px}
+  .wrap{max-width:880px;margin:0 auto}
+  header h1{font-size:22px;font-weight:700}
+  header .sub{color:var(--ink-2);font-size:13px;margin-top:2px}
+  .updated{color:var(--muted);font-size:12px;margin-top:2px}
+
+  nav{display:flex;gap:6px;margin:18px 0 14px;flex-wrap:wrap}
+  nav button{border:1px solid var(--border);background:var(--surface);color:var(--ink-2);border-radius:20px;padding:7px 14px;font-size:13px;cursor:pointer;font-family:inherit}
+  nav button.active{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600}
+  section{display:none}
+  section.show{display:block}
+
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:14px}
+  .card h2{font-size:14px;font-weight:700;margin-bottom:10px;color:var(--ink)}
+  .card h2 .note{font-weight:400;color:var(--muted);font-size:12px}
+
+  /* race path */
+  .races{display:flex;flex-direction:column;gap:0}
+  .race{display:flex;gap:12px;position:relative;padding:10px 0}
+  .race .dot{width:12px;height:12px;border-radius:50%;background:var(--chip);border:2px solid var(--muted);margin-top:5px;flex-shrink:0;z-index:1}
+  .race.main .dot{background:var(--accent);border-color:var(--accent)}
+  .race.mid .dot{border-color:var(--accent)}
+  .race:not(:last-child):before{content:"";position:absolute;left:5px;top:26px;bottom:-12px;width:2px;background:var(--grid)}
+  .race .body{flex:1}
+  .race .when{font-size:12px;color:var(--muted)}
+  .race .name{font-weight:600;font-size:15px}
+  .race.main .name{color:var(--accent-deep)}
+  .race .meta{font-size:13px;color:var(--ink-2)}
+  .race .count{font-size:12px;font-weight:600;color:var(--accent-deep);white-space:nowrap;margin-top:3px}
+
+  /* tiles */
+  .tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+  .tile{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px 14px}
+  .tile .label{font-size:12px;color:var(--ink-2)}
+  .tile .value{font-size:24px;font-weight:700;margin-top:2px}
+  .tile .hint{font-size:11px;color:var(--muted);margin-top:2px}
+  .tile .value .unit{font-size:13px;font-weight:400;color:var(--ink-2)}
+
+  /* traffic light */
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th{text-align:left;color:var(--muted);font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.04em;padding:6px 8px;border-bottom:1px solid var(--grid)}
+  td{padding:8px;border-bottom:1px solid var(--grid);vertical-align:top}
+  tr:last-child td{border-bottom:none}
+  .num{font-variant-numeric:tabular-nums}
+  .st{display:inline-flex;align-items:center;gap:5px;font-weight:600;font-size:12px}
+  .st .ic{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+  .st.good{color:var(--good-text)}.st.good .ic{background:var(--good)}
+  .st.warn{color:var(--ink)}.st.warn .ic{background:var(--warn)}
+  .st.crit{color:var(--crit)}.st.crit .ic{background:var(--crit)}
+  .st.na{color:var(--muted)}.st.na .ic{background:var(--muted)}
+
+  .day-today td{background:color-mix(in srgb, var(--accent) 7%, transparent)}
+  .done{color:var(--good-text);font-weight:600}
+  .badge{display:inline-block;background:var(--chip);border-radius:6px;padding:1px 7px;font-size:11px;color:var(--ink-2);font-weight:600}
+  .badge.race{background:var(--accent);color:#fff}
+
+  .phase-peak td{font-weight:600}
+  .rules p{font-size:13px;color:var(--ink-2);margin-bottom:8px}
+  .rules b{color:var(--ink)}
+  .zones{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;margin-top:6px}
+  .zone{border:1px solid var(--border);border-radius:10px;padding:8px 10px;font-size:12px}
+  .zone b{display:block;font-size:14px}
+  .foot{color:var(--muted);font-size:11px;margin-top:18px;text-align:center}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>🏃 Training Hub — путь к Самарканду</h1>
+    <div class="sub">Бег · вело · плавание — сезон 2026</div>
+    <div class="updated">Данные обновлены: 09.08.2026, вс вечер · автообновление каждое воскресенье ~20:00</div>
+  </header>
+
+  <nav>
+    <button class="active" data-t="overview">Обзор</button>
+    <button data-t="week">Неделя</button>
+    <button data-t="macro">Макроплан</button>
+    <button data-t="rules">Правила</button>
+  </nav>
+
+  <!-- ОБЗОР -->
+  <section id="overview" class="show">
+    <div class="card">
+      <h2>Календарь стартов</h2>
+      <div class="races">
+        <div class="race">
+          <div class="dot"></div>
+          <div class="body">
+            <div class="when">Сб 15 августа</div>
+            <div class="name">🚴 Велогонка</div>
+            <div class="meta">Режим «покататься»: ср. пульс 140–145, в группе, 60 г угл./час с 20-й мин</div>
+            <div class="count" data-date="2026-08-15"></div>
+          </div>
+        </div>
+        <div class="race mid">
+          <div class="dot"></div>
+          <div class="body">
+            <div class="when">Сб 5 сентября</div>
+            <div class="name">🏃 Полумарафон 21,1 км</div>
+            <div class="meta">Целевой промежуточный · прогноз Garmin 2:03:58 · темп ПМ по ЧСС 148–152</div>
+            <div class="count" data-date="2026-09-05"></div>
+          </div>
+        </div>
+        <div class="race main">
+          <div class="dot"></div>
+          <div class="body">
+            <div class="when">7–8 ноября</div>
+            <div class="name">🏆 Марафон — Самарканд 🇺🇿</div>
+            <div class="meta">Главный старт года · ориентир 4:30–4:45 (темп 6:20–6:45/км, ЧСС 140–148) · климат ~13°C — идеальный</div>
+            <div class="count" data-date="2026-11-07"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Форма <span class="note">· Garmin, 09.08</span></h2>
+      <div class="tiles">
+        <div class="tile"><div class="label">VO₂max</div><div class="value num">48</div><div class="hint">ЛП 159 уд/мин</div></div>
+        <div class="tile"><div class="label">ACWR</div><div class="value num">1,1</div><div class="hint" style="color:var(--good-text);font-weight:600">OPTIMAL — впервые за месяц</div></div>
+        <div class="tile"><div class="label">Хрон. нагрузка</div><div class="value num">366</div><div class="hint">коридор 293–549</div></div>
+        <div class="tile"><div class="label">Прогноз ПМ</div><div class="value num">2:03:58</div><div class="hint">Garmin race predictor</div></div>
+        <div class="tile"><div class="label">Прогноз марафона</div><div class="value num">4:40:42</div><div class="hint">Garmin race predictor</div></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Светофор восстановления <span class="note">· утро 09.08, после ночи с малышом</span></h2>
+      <table>
+        <thead><tr><th>Метрика</th><th>Значение</th><th>Порог 🟢</th><th>Статус</th></tr></thead>
+        <tbody>
+          <tr><td>Сон прошлой ночью</td><td class="num">4 ч 55 мин</td><td class="num">≥ 7,5 ч</td><td><span class="st crit"><span class="ic"></span>✗ критично</span></td></tr>
+          <tr><td>Training Readiness</td><td class="num">4 / 100</td><td class="num">≥ 60</td><td><span class="st crit"><span class="ic"></span>✗ POOR</span></td></tr>
+          <tr><td>RHR</td><td class="num">56 (7-дн. ср. 52)</td><td class="num">≤ 52</td><td><span class="st warn"><span class="ic"></span>⚠ повышен</span></td></tr>
+          <tr><td>Body Battery (вечер)</td><td class="num">5</td><td class="num">≥ 70 утром</td><td><span class="st crit"><span class="ic"></span>✗ разряжен</span></td></tr>
+          <tr><td>ACWR</td><td class="num">1,1</td><td class="num">0,8–1,3</td><td><span class="st good"><span class="ic"></span>✓ оптимум</span></td></tr>
+        </tbody>
+      </table>
+      <p style="font-size:12px;color:var(--ink-2);margin-top:10px">Вывод 09.08: длинный бег правильно перенесён на понедельник. Решение утром пн — по RHR (≤53) и Body Battery (≥60): да → бежать, нет → вечером или сократить до 12–14 км.</p>
+    </div>
+  </section>
+
+  <!-- НЕДЕЛЯ -->
+  <section id="week">
+    <div class="card">
+      <h2>Неделя 10–16 августа <span class="note">· разгрузка + велогонка · тренировки уже в календаре Garmin ⌚</span></h2>
+      <table>
+        <thead><tr><th>День</th><th>Тренировка</th><th>Цель по ЧСС</th><th></th></tr></thead>
+        <tbody>
+          <tr><td>Пн 10.08</td><td>🏃 Длинный <b>16 км</b> (перенос с вс) — утром или вечером по самочувствию</td><td class="num">130–145</td><td><span class="badge">⌚ в часах</span></td></tr>
+          <tr><td>Вт 11.08</td><td>😴 Отдых — компенсация сна</td><td>—</td><td></td></tr>
+          <tr><td>Ср 12.08</td><td>🏃 40 мин легко</td><td class="num">125–140</td><td><span class="badge">⌚ в часах</span></td></tr>
+          <tr><td>Чт 13.08</td><td>😴 Отдых</td><td>—</td><td></td></tr>
+          <tr><td>Пт 14.08</td><td>🏃 40 мин + 3×2 мин бодрее (открывашки)</td><td class="num">125–140</td><td><span class="badge">⌚ в часах</span></td></tr>
+          <tr><td>Сб 15.08</td><td>🚴 <b>Велогонка</b> — «покататься»: в группе, без отрывов и спринта</td><td class="num">ср. ≤ 140–145</td><td><span class="badge race">🏁 старт</span></td></tr>
+          <tr><td>Вс 16.08</td><td>🏃 Длинный <b>12 км</b> легко (при тяжёлых ногах → пн 17.08)</td><td class="num">130–145</td><td><span class="badge">⌚ в часах</span></td></tr>
+        </tbody>
+      </table>
+      <p style="font-size:12px;color:var(--ink-2);margin-top:10px">🧃 На гонке: 60 г углеводов/час + 600 мл/час с 20-й минуты. Каденс 90+, в подъём сидя. Группа уезжает — отпускать.</p>
+    </div>
+  </section>
+
+  <!-- МАКРОПЛАН -->
+  <section id="macro">
+    <div class="card">
+      <h2>Марафонский блок: 9 недель после полумарафона</h2>
+      <table>
+        <thead><tr><th>Нед</th><th>Даты</th><th>Фаза</th><th>Длинный</th><th>Ключевое</th></tr></thead>
+        <tbody>
+          <tr><td class="num">1</td><td class="num">07–13.09</td><td>Восстановление</td><td>3×30–40 мин</td><td>🩸 сдать все анализы (ферритин-панель)</td></tr>
+          <tr><td class="num">2</td><td class="num">14–20.09</td><td>Переходная</td><td class="num">14–16 км</td><td>Флеботомия №1 → неделя лёгкая</td></tr>
+          <tr><td class="num">3</td><td class="num">21–27.09</td><td>База 1</td><td class="num">20–22 км</td><td>темповая 6 км (148–152)</td></tr>
+          <tr><td class="num">4</td><td class="num">28.09–04.10</td><td>База 2</td><td class="num">24 км</td><td>темповая 8 км, питание на длинной</td></tr>
+          <tr><td class="num">5</td><td class="num">05–11.10</td><td>Разгрузка</td><td class="num">16 км</td><td>контроль метрик, взвешивание</td></tr>
+          <tr class="phase-peak"><td class="num">6</td><td class="num">12–18.10</td><td>Пик 1</td><td class="num">26–28 км</td><td>🧃 репетиция питания №1</td></tr>
+          <tr class="phase-peak"><td class="num">7</td><td class="num">19–25.10</td><td>Пик 2</td><td class="num">30–32 км</td><td>🧃 генеральная репетиция, макс. объём</td></tr>
+          <tr><td class="num">8</td><td class="num">26.10–01.11</td><td>Подводка</td><td class="num">18–20 км</td><td>последняя работа в темпе марафона</td></tr>
+          <tr><td class="num">9</td><td class="num">02–07.11</td><td>Taper</td><td>—</td><td>🏆 МАРАФОН 07–08.11</td></tr>
+        </tbody>
+      </table>
+      <p style="font-size:12px;color:var(--ink-2);margin-top:10px">Объём: ~40 → 55–60 км/нед на пике. Вело — Z1–Z2 как восстановление. Плавание и ЛФК 2×/нед с 17.08. До 05.09 действует текущий план подготовки к ПМ.</p>
+    </div>
+    <div class="card">
+      <h2>Питание в марафонском блоке</h2>
+      <table>
+        <tbody>
+          <tr><td>Пиковые недели</td><td class="num">3000–3200 ккал · углеводы 5–6 г/кг</td></tr>
+          <tr><td>Гонка</td><td class="num">60–90 г углеводов/час с 20-й мин · 500–700 мл/час</td></tr>
+          <tr><td>Загрузка перед стартом</td><td class="num">8–10 г/кг за 2 дня</td></tr>
+          <tr><td>Правило</td><td>Не худеть весь блок · что не отработано на длинных нед 6–7 — на старте не пробуем</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ПРАВИЛА -->
+  <section id="rules">
+    <div class="card rules">
+      <h2>Пульсовые ориентиры</h2>
+      <div class="zones">
+        <div class="zone"><b class="num">125–140</b>лёгкий бег / восстановление</div>
+        <div class="zone"><b class="num">до 145–148</b>длинные</div>
+        <div class="zone"><b class="num">148–152</b>темп полумарафона</div>
+        <div class="zone"><b class="num">140–148</b>темп марафона</div>
+        <div class="zone"><b class="num">159</b>лактатный порог — не заходить</div>
+      </div>
+    </div>
+    <div class="card rules">
+      <h2>Правила системы</h2>
+      <p><b>1. Сон бьёт план.</b> Ночь &lt; 5,5 ч или Training Readiness &lt; 25 утром → интенсивность превращается в лёгкий бег, длинный сдвигается на 1 день. Ночи с малышом — это нормально, план гибкий по умолчанию.</p>
+      <p><b>2. Отменяется вело, а не бег.</b> RHR ≥ 54 утром или тяжесть в ногах → первым режем велосипед.</p>
+      <p><b>3. Спина.</b> Грыжа L4–L5 по симптомам не беспокоит, но профилактика остаётся: каденс 170+, без ударов по разбитому грунту, ЛФК 2×/нед. Контроль у невролога — до пиковых недель октября.</p>
+      <p><b>4. Ферритин 560.</b> Диагностика — неделя 07–13.09, флеботомия — на низкой неделе 14–20.09. После флеботомии 10–14 дней без интенсивности. Железо в добавках — нет.</p>
+      <p><b>5. Автопланирование.</b> Каждое воскресенье ~20:00 анализ недели (Garmin + YAZIO) → план на следующую → тренировки в календарь Garmin → отчёт в Health Hub.</p>
+    </div>
+  </section>
+
+  <div class="foot">Health Hub · обновляется еженедельно · данные: Garmin Connect, YAZIO</div>
+</div>
+
+<script>
+  // tabs
+  document.querySelectorAll('nav button').forEach(b=>{
+    b.addEventListener('click',()=>{
+      document.querySelectorAll('nav button').forEach(x=>x.classList.remove('active'));
+      document.querySelectorAll('section').forEach(s=>s.classList.remove('show'));
+      b.classList.add('active');
+      document.getElementById(b.dataset.t).classList.add('show');
+    });
+  });
+  // countdowns
+  const now=new Date(); now.setHours(0,0,0,0);
+  document.querySelectorAll('.count').forEach(el=>{
+    const d=new Date(el.dataset.date+'T00:00:00');
+    const diff=Math.round((d-now)/86400000);
+    if(diff>1) el.textContent='через '+diff+' дн.';
+    else if(diff===1) el.textContent='завтра!';
+    else if(diff===0) el.textContent='сегодня!';
+    else el.textContent='прошло';
+  });
+</script>
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js'));
+  }
+</script>
+</body>
+</html>
