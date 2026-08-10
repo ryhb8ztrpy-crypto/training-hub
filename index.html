@@ -22,7 +22,7 @@
     --chip:#f0efec;
   }
   @media (prefers-color-scheme: dark){
-    :root{
+    :root:where(:not([data-theme="light"])){
       color-scheme: dark;
       --page:#0d0d0d; --surface:#1a1a19;
       --ink:#ffffff; --ink-2:#c3c2b7; --muted:#898781;
@@ -31,6 +31,15 @@
       --good-text:#0ca30c;
       --chip:#383835;
     }
+  }
+  :root[data-theme="dark"]{
+    color-scheme: dark;
+    --page:#0d0d0d; --surface:#1a1a19;
+    --ink:#ffffff; --ink-2:#c3c2b7; --muted:#898781;
+    --grid:#2c2c2a; --border:rgba(255,255,255,.10);
+    --accent:#3987e5; --accent-deep:#86b6ef;
+    --good-text:#0ca30c;
+    --chip:#383835;
   }
   *{box-sizing:border-box;margin:0;padding:0}
   body{font-family:system-ui,-apple-system,"Segoe UI",sans-serif;background:var(--page);color:var(--ink);line-height:1.45;padding:20px 16px 48px}
@@ -41,6 +50,8 @@
   .updated{color:var(--muted);font-size:12px;margin-top:2px}
   #refresh{border:1px solid var(--border);background:var(--surface);color:var(--accent-deep);border-radius:10px;padding:8px 14px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;flex-shrink:0;display:flex;align-items:center;gap:6px}
   #refresh:active{opacity:.6}
+  #theme-btn{border:1px solid var(--border);background:var(--surface);color:var(--ink-2);border-radius:10px;padding:5px 12px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit}
+  #theme-btn:active{opacity:.6}
 
   nav{display:flex;gap:6px;margin:18px 0 14px;flex-wrap:wrap}
   nav button{border:1px solid var(--border);background:var(--surface);color:var(--ink-2);border-radius:20px;padding:7px 14px;font-size:13px;cursor:pointer;font-family:inherit}
@@ -125,7 +136,10 @@
         <div class="sub">Бег · вело · плавание — сезон 2026</div>
         <div class="updated">Данные обновлены: 10.08.2026 · длинная 16 км выполнена ✅ · велогонка 15.08 отменена</div>
       </div>
-      <button id="refresh" title="Загрузить свежую версию">⟳ Обновить</button>
+      <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end;flex-shrink:0">
+        <button id="refresh" title="Загрузить свежую версию">⟳ Обновить</button>
+        <button id="theme-btn" title="Тема оформления">🌓 Авто</button>
+      </div>
     </div>
   </header>
 
@@ -304,6 +318,29 @@
     else if(diff===0) el.textContent='сегодня!';
     else el.textContent='прошло';
   });
+  // тема: Авто (по системе) → Светлая → Тёмная, выбор запоминается
+  (function(){
+    const btn=document.getElementById('theme-btn');
+    const modes=['auto','light','dark'];
+    const labels={auto:'🌓 Авто', light:'☀️ Светлая', dark:'🌙 Тёмная'};
+    let mode='auto';
+    try{ const s=localStorage.getItem('th-theme'); if(modes.includes(s)) mode=s; }catch(e){}
+    function apply(){
+      if(mode==='auto') document.documentElement.removeAttribute('data-theme');
+      else document.documentElement.setAttribute('data-theme', mode);
+      btn.textContent=labels[mode];
+      const dark = mode==='dark' || (mode==='auto' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+      const tc=document.querySelector('meta[name="theme-color"]');
+      if(tc) tc.setAttribute('content', dark ? '#0d0d0d' : '#1c5cab');
+    }
+    btn.addEventListener('click',()=>{
+      mode=modes[(modes.indexOf(mode)+1)%3];
+      try{ localStorage.setItem('th-theme', mode); }catch(e){}
+      apply();
+    });
+    try{ window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', apply); }catch(e){}
+    apply();
+  })();
   // прогресс-бары до стартов (старт цикла подготовки — 27.07.2026)
   (function(){
     const t=new Date(); t.setHours(0,0,0,0);
