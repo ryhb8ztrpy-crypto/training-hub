@@ -35,9 +35,12 @@
   *{box-sizing:border-box;margin:0;padding:0}
   body{font-family:system-ui,-apple-system,"Segoe UI",sans-serif;background:var(--page);color:var(--ink);line-height:1.45;padding:20px 16px 48px}
   .wrap{max-width:880px;margin:0 auto}
+  .hrow{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
   header h1{font-size:22px;font-weight:700}
   header .sub{color:var(--ink-2);font-size:13px;margin-top:2px}
   .updated{color:var(--muted);font-size:12px;margin-top:2px}
+  #refresh{border:1px solid var(--border);background:var(--surface);color:var(--accent-deep);border-radius:10px;padding:8px 14px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;flex-shrink:0;display:flex;align-items:center;gap:6px}
+  #refresh:active{opacity:.6}
 
   nav{display:flex;gap:6px;margin:18px 0 14px;flex-wrap:wrap}
   nav button{border:1px solid var(--border);background:var(--surface);color:var(--ink-2);border-radius:20px;padding:7px 14px;font-size:13px;cursor:pointer;font-family:inherit}
@@ -49,7 +52,6 @@
   .card h2{font-size:14px;font-weight:700;margin-bottom:10px;color:var(--ink)}
   .card h2 .note{font-weight:400;color:var(--muted);font-size:12px}
 
-  /* race path */
   .races{display:flex;flex-direction:column;gap:0}
   .race{display:flex;gap:12px;position:relative;padding:10px 0}
   .race .dot{width:12px;height:12px;border-radius:50%;background:var(--chip);border:2px solid var(--muted);margin-top:5px;flex-shrink:0;z-index:1}
@@ -63,15 +65,12 @@
   .race .meta{font-size:13px;color:var(--ink-2)}
   .race .count{font-size:12px;font-weight:600;color:var(--accent-deep);white-space:nowrap;margin-top:3px}
 
-  /* tiles */
   .tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
   .tile{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px 14px}
   .tile .label{font-size:12px;color:var(--ink-2)}
   .tile .value{font-size:24px;font-weight:700;margin-top:2px}
   .tile .hint{font-size:11px;color:var(--muted);margin-top:2px}
-  .tile .value .unit{font-size:13px;font-weight:400;color:var(--ink-2)}
 
-  /* traffic light */
   table{width:100%;border-collapse:collapse;font-size:13px}
   th{text-align:left;color:var(--muted);font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.04em;padding:6px 8px;border-bottom:1px solid var(--grid)}
   td{padding:8px;border-bottom:1px solid var(--grid);vertical-align:top}
@@ -82,12 +81,10 @@
   .st.good{color:var(--good-text)}.st.good .ic{background:var(--good)}
   .st.warn{color:var(--ink)}.st.warn .ic{background:var(--warn)}
   .st.crit{color:var(--crit)}.st.crit .ic{background:var(--crit)}
-  .st.na{color:var(--muted)}.st.na .ic{background:var(--muted)}
 
-  .day-today td{background:color-mix(in srgb, var(--accent) 7%, transparent)}
   .done{color:var(--good-text);font-weight:600}
   .badge{display:inline-block;background:var(--chip);border-radius:6px;padding:1px 7px;font-size:11px;color:var(--ink-2);font-weight:600}
-  .badge.race{background:var(--accent);color:#fff}
+  .badge.ok{background:var(--good);color:#fff}
 
   .phase-peak td{font-weight:600}
   .rules p{font-size:13px;color:var(--ink-2);margin-bottom:8px}
@@ -101,9 +98,14 @@
 <body>
 <div class="wrap">
   <header>
-    <h1>🏃 Training Hub — путь к Самарканду</h1>
-    <div class="sub">Бег · вело · плавание — сезон 2026</div>
-    <div class="updated">Данные обновлены: 09.08.2026, вс вечер · автообновление каждое воскресенье ~20:00</div>
+    <div class="hrow">
+      <div>
+        <h1>🏃 Training Hub — путь к Самарканду</h1>
+        <div class="sub">Бег · вело · плавание — сезон 2026</div>
+        <div class="updated">Данные обновлены: 10.08.2026 · длинная 16 км выполнена ✅ · велогонка 15.08 отменена</div>
+      </div>
+      <button id="refresh" title="Загрузить свежую версию">⟳ Обновить</button>
+    </div>
   </header>
 
   <nav>
@@ -118,15 +120,6 @@
     <div class="card">
       <h2>Календарь стартов</h2>
       <div class="races">
-        <div class="race">
-          <div class="dot"></div>
-          <div class="body">
-            <div class="when">Сб 15 августа</div>
-            <div class="name">🚴 Велогонка</div>
-            <div class="meta">Режим «покататься»: ср. пульс 140–145, в группе, 60 г угл./час с 20-й мин</div>
-            <div class="count" data-date="2026-08-15"></div>
-          </div>
-        </div>
         <div class="race mid">
           <div class="dot"></div>
           <div class="body">
@@ -149,10 +142,10 @@
     </div>
 
     <div class="card">
-      <h2>Форма <span class="note">· Garmin, 09.08</span></h2>
+      <h2>Форма <span class="note">· Garmin, 10.08</span></h2>
       <div class="tiles">
         <div class="tile"><div class="label">VO₂max</div><div class="value num">48</div><div class="hint">ЛП 159 уд/мин</div></div>
-        <div class="tile"><div class="label">ACWR</div><div class="value num">1,1</div><div class="hint" style="color:var(--good-text);font-weight:600">OPTIMAL — впервые за месяц</div></div>
+        <div class="tile"><div class="label">ACWR</div><div class="value num">~1,3</div><div class="hint">верх нормы — ожидаемо после длинной</div></div>
         <div class="tile"><div class="label">Хрон. нагрузка</div><div class="value num">366</div><div class="hint">коридор 293–549</div></div>
         <div class="tile"><div class="label">Прогноз ПМ</div><div class="value num">2:03:58</div><div class="hint">Garmin race predictor</div></div>
         <div class="tile"><div class="label">Прогноз марафона</div><div class="value num">4:40:42</div><div class="hint">Garmin race predictor</div></div>
@@ -160,38 +153,38 @@
     </div>
 
     <div class="card">
-      <h2>Светофор восстановления <span class="note">· утро 09.08, после ночи с малышом</span></h2>
+      <h2>Светофор восстановления <span class="note">· пн 10.08, после длинной</span></h2>
       <table>
         <thead><tr><th>Метрика</th><th>Значение</th><th>Порог 🟢</th><th>Статус</th></tr></thead>
         <tbody>
-          <tr><td>Сон прошлой ночью</td><td class="num">4 ч 55 мин</td><td class="num">≥ 7,5 ч</td><td><span class="st crit"><span class="ic"></span>✗ критично</span></td></tr>
-          <tr><td>Training Readiness</td><td class="num">4 / 100</td><td class="num">≥ 60</td><td><span class="st crit"><span class="ic"></span>✗ POOR</span></td></tr>
-          <tr><td>RHR</td><td class="num">56 (7-дн. ср. 52)</td><td class="num">≤ 52</td><td><span class="st warn"><span class="ic"></span>⚠ повышен</span></td></tr>
-          <tr><td>Body Battery (вечер)</td><td class="num">5</td><td class="num">≥ 70 утром</td><td><span class="st crit"><span class="ic"></span>✗ разряжен</span></td></tr>
-          <tr><td>ACWR</td><td class="num">1,1</td><td class="num">0,8–1,3</td><td><span class="st good"><span class="ic"></span>✓ оптимум</span></td></tr>
+          <tr><td>Сон в ночь на пн</td><td class="num">7 ч 44 мин · score 90</td><td class="num">≥ 7,5 ч</td><td><span class="st good"><span class="ic"></span>✓ EXCELLENT</span></td></tr>
+          <tr><td>HRV за ночь</td><td class="num">42 мс</td><td class="num">≥ 38</td><td><span class="st good"><span class="ic"></span>✓ выше базы</span></td></tr>
+          <tr><td>Training Readiness (утро)</td><td class="num">67</td><td class="num">≥ 60</td><td><span class="st good"><span class="ic"></span>✓ MODERATE+</span></td></tr>
+          <tr><td>Recovery time после 16 км</td><td class="num">38 ч (до утра ср)</td><td>—</td><td><span class="st warn"><span class="ic"></span>⚠ вт — отдых</span></td></tr>
+          <tr><td>Длинная 16 км</td><td class="num">ср. ЧСС 134 / макс 151</td><td class="num">130–145</td><td><span class="st good"><span class="ic"></span>✓ идеально</span></td></tr>
         </tbody>
       </table>
-      <p style="font-size:12px;color:var(--ink-2);margin-top:10px">Вывод 09.08: длинный бег правильно перенесён на понедельник. Решение утром пн — по RHR (≤53) и Body Battery (≥60): да → бежать, нет → вечером или сократить до 12–14 км.</p>
+      <p style="font-size:12px;color:var(--ink-2);margin-top:10px">Сегодня: углеводы до 300 г, вода до 3 л. Вторник — полный отдых, recovery time закрывается к утру среды.</p>
     </div>
   </section>
 
   <!-- НЕДЕЛЯ -->
   <section id="week">
     <div class="card">
-      <h2>Неделя 10–16 августа <span class="note">· разгрузка + велогонка · тренировки уже в календаре Garmin ⌚</span></h2>
+      <h2>Неделя 10–16 августа <span class="note">· разгрузка перед пиковой · велогонка отменена</span></h2>
       <table>
         <thead><tr><th>День</th><th>Тренировка</th><th>Цель по ЧСС</th><th></th></tr></thead>
         <tbody>
-          <tr><td>Пн 10.08</td><td>🏃 Длинный <b>16 км</b> (перенос с вс) — утром или вечером по самочувствию</td><td class="num">130–145</td><td><span class="badge">⌚ в часах</span></td></tr>
-          <tr><td>Вт 11.08</td><td>😴 Отдых — компенсация сна</td><td>—</td><td></td></tr>
+          <tr><td>Пн 10.08</td><td class="done">✅ Длинный 16,0 км — 1:43, ср. ЧСС 134, точно в коридоре</td><td class="num">130–145</td><td><span class="badge ok">сделано</span></td></tr>
+          <tr><td>Вт 11.08</td><td>😴 Полный отдых — recovery time после длинной</td><td>—</td><td></td></tr>
           <tr><td>Ср 12.08</td><td>🏃 40 мин легко</td><td class="num">125–140</td><td><span class="badge">⌚ в часах</span></td></tr>
           <tr><td>Чт 13.08</td><td>😴 Отдых</td><td>—</td><td></td></tr>
-          <tr><td>Пт 14.08</td><td>🏃 40 мин + 3×2 мин бодрее (открывашки)</td><td class="num">125–140</td><td><span class="badge">⌚ в часах</span></td></tr>
-          <tr><td>Сб 15.08</td><td>🚴 <b>Велогонка</b> — «покататься»: в группе, без отрывов и спринта</td><td class="num">ср. ≤ 140–145</td><td><span class="badge race">🏁 старт</span></td></tr>
-          <tr><td>Вс 16.08</td><td>🏃 Длинный <b>12 км</b> легко (при тяжёлых ногах → пн 17.08)</td><td class="num">130–145</td><td><span class="badge">⌚ в часах</span></td></tr>
+          <tr><td>Пт 14.08</td><td>🏃 40 мин легко</td><td class="num">125–140</td><td><span class="badge">⌚ в часах</span></td></tr>
+          <tr><td>Сб 15.08</td><td>😴 Отдых или 🚴 лёгкое вело 60–75 мин Z1–Z2 по желанию</td><td class="num">&lt; 140</td><td></td></tr>
+          <tr><td>Вс 16.08</td><td>🏃 Длинный <b>12–14 км</b> легко, по самочувствию</td><td class="num">130–145</td><td><span class="badge">⌚ в часах</span></td></tr>
         </tbody>
       </table>
-      <p style="font-size:12px;color:var(--ink-2);margin-top:10px">🧃 На гонке: 60 г углеводов/час + 600 мл/час с 20-й минуты. Каденс 90+, в подъём сидя. Группа уезжает — отпускать.</p>
+      <p style="font-size:12px;color:var(--ink-2);margin-top:10px">📌 Каденс на длинных — 170+, особенно в подъёмы (в пн был ~163). Вечером в вс — первый автоплан пиковой недели 17–23.08.</p>
     </div>
   </section>
 
@@ -203,7 +196,7 @@
         <thead><tr><th>Нед</th><th>Даты</th><th>Фаза</th><th>Длинный</th><th>Ключевое</th></tr></thead>
         <tbody>
           <tr><td class="num">1</td><td class="num">07–13.09</td><td>Восстановление</td><td>3×30–40 мин</td><td>🩸 сдать все анализы (ферритин-панель)</td></tr>
-          <tr><td class="num">2</td><td class="num">14–20.09</td><td>Переходная</td><td class="num">14–16 км</td><td>Флеботомия №1 → неделя лёгкая</td></tr>
+          <tr><td class="num">2</td><td class="num">14–20.09</td><td>Переходная</td><td class="num">14–16 км</td><td>Флеботомия №1 (если назначена) → неделя лёгкая</td></tr>
           <tr><td class="num">3</td><td class="num">21–27.09</td><td>База 1</td><td class="num">20–22 км</td><td>темповая 6 км (148–152)</td></tr>
           <tr><td class="num">4</td><td class="num">28.09–04.10</td><td>База 2</td><td class="num">24 км</td><td>темповая 8 км, питание на длинной</td></tr>
           <tr><td class="num">5</td><td class="num">05–11.10</td><td>Разгрузка</td><td class="num">16 км</td><td>контроль метрик, взвешивание</td></tr>
@@ -246,7 +239,7 @@
       <p><b>2. Отменяется вело, а не бег.</b> RHR ≥ 54 утром или тяжесть в ногах → первым режем велосипед.</p>
       <p><b>3. Спина.</b> Грыжа L4–L5 по симптомам не беспокоит, но профилактика остаётся: каденс 170+, без ударов по разбитому грунту, ЛФК 2×/нед. Контроль у невролога — до пиковых недель октября.</p>
       <p><b>4. Ферритин 560.</b> Диагностика — неделя 07–13.09, флеботомия — на низкой неделе 14–20.09. После флеботомии 10–14 дней без интенсивности. Железо в добавках — нет.</p>
-      <p><b>5. Автопланирование.</b> Каждое воскресенье ~20:00 анализ недели (Garmin + YAZIO) → план на следующую → тренировки в календарь Garmin → отчёт в Health Hub.</p>
+      <p><b>5. Автопланирование.</b> Каждое воскресенье ~20:00 анализ недели (Garmin + YAZIO) → план на следующую → тренировки в календарь Garmin → отчёт в Health Hub. Кнопка «⟳ Обновить» наверху подтягивает свежую версию после любых правок.</p>
     </div>
   </section>
 
@@ -273,8 +266,22 @@
     else if(diff===0) el.textContent='сегодня!';
     else el.textContent='прошло';
   });
-</script>
-<script>
+  // manual refresh: очистить кэш SW и перезагрузить
+  document.getElementById('refresh').addEventListener('click', async ()=>{
+    const btn=document.getElementById('refresh');
+    btn.textContent='…загружаю'; btn.disabled=true;
+    try{
+      if('caches' in window){
+        const keys=await caches.keys();
+        await Promise.all(keys.map(k=>caches.delete(k)));
+      }
+      if(navigator.serviceWorker){
+        const regs=await navigator.serviceWorker.getRegistrations();
+        await Promise.all(regs.map(r=>r.update()));
+      }
+    }catch(e){}
+    location.reload();
+  });
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js'));
   }
