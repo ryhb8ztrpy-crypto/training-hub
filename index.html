@@ -83,6 +83,11 @@
   .st.crit{color:var(--crit)}.st.crit .ic{background:var(--crit)}
 
   .done{color:var(--good-text);font-weight:600}
+  .wk-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:2px}
+  .wk-navs{display:flex;gap:6px}
+  .wk-nav{border:1px solid var(--border);background:var(--surface);color:var(--accent-deep);border-radius:8px;padding:4px 12px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit}
+  .wk-nav:disabled{opacity:.3;cursor:default}
+  .wk-sub{font-size:12px;color:var(--muted);margin-bottom:10px}
   tr.today td{background:color-mix(in srgb, var(--accent) 10%, transparent)}
   tr.today td:first-child{font-weight:700;color:var(--accent-deep)}
   tr.past td{opacity:.55}
@@ -175,20 +180,17 @@
   <!-- НЕДЕЛЯ -->
   <section id="week">
     <div class="card">
-      <h2>Неделя 10–16 августа <span class="note">· разгрузка перед пиковой · велогонка отменена</span></h2>
-      <table>
-        <thead><tr><th>День</th><th>Тренировка</th><th>Цель по ЧСС</th><th></th></tr></thead>
-        <tbody id="week-days">
-          <tr data-d="2026-08-10"><td>Пн 10.08</td><td class="done">✅ Длинный 16,0 км — 1:43, ср. ЧСС 134, точно в коридоре</td><td class="num">130–145</td><td><span class="badge ok">сделано</span></td></tr>
-          <tr data-d="2026-08-11"><td>Вт 11.08</td><td>😴 Полный отдых — recovery time после длинной</td><td>—</td><td></td></tr>
-          <tr data-d="2026-08-12"><td>Ср 12.08</td><td>🏃 40 мин легко</td><td class="num">125–140</td><td><span class="badge">⌚ в часах</span></td></tr>
-          <tr data-d="2026-08-13"><td>Чт 13.08</td><td>😴 Отдых</td><td>—</td><td></td></tr>
-          <tr data-d="2026-08-14"><td>Пт 14.08</td><td>🏃 40 мин легко</td><td class="num">125–140</td><td><span class="badge">⌚ в часах</span></td></tr>
-          <tr data-d="2026-08-15"><td>Сб 15.08</td><td>😴 Отдых или 🚴 лёгкое вело 60–75 мин Z1–Z2 по желанию</td><td class="num">&lt; 140</td><td></td></tr>
-          <tr data-d="2026-08-16"><td>Вс 16.08</td><td>🏃 Длинный <b>12–14 км</b> легко, по самочувствию</td><td class="num">130–145</td><td><span class="badge">⌚ в часах</span></td></tr>
-        </tbody>
-      </table>
-      <p style="font-size:12px;color:var(--ink-2);margin-top:10px">📌 Каденс на длинных — 170+, особенно в подъёмы (в пн был ~163). Вечером в вс — первый автоплан пиковой недели 17–23.08.</p>
+      <div class="wk-head">
+        <h2 id="wk-title" style="margin-bottom:0">Неделя</h2>
+        <div class="wk-navs">
+          <button class="wk-nav" id="wk-prev" title="Предыдущая неделя">‹</button>
+          <button class="wk-nav" id="wk-today" title="К текущей неделе">Сегодня</button>
+          <button class="wk-nav" id="wk-next" title="Следующая неделя">›</button>
+        </div>
+      </div>
+      <div id="wk-sub" class="wk-sub"></div>
+      <div id="wk-body"></div>
+      <p id="wk-note" style="font-size:12px;color:var(--ink-2);margin-top:10px"></p>
     </div>
   </section>
 
@@ -270,18 +272,117 @@
     else if(diff===0) el.textContent='сегодня!';
     else el.textContent='прошло';
   });
-  // подсветка текущего дня в таблице недели
-  (function(){
-    const t=new Date(); t.setHours(0,0,0,0);
-    document.querySelectorAll('#week-days tr[data-d]').forEach(tr=>{
-      const d=new Date(tr.dataset.d+'T00:00:00');
-      if(d.getTime()===t.getTime()){
-        tr.classList.add('today');
-        const m=document.createElement('span'); m.className='today-mark'; m.textContent='СЕГОДНЯ';
-        tr.querySelector('td').appendChild(m);
-      } else if(d<t){ tr.classList.add('past'); }
-    });
-  })();
+  // ===== Недели: автопереключение по дате + листание =====
+  // Детальные недели (обновляются воскресным автопланом). d: [текст, ЧСС, бейдж]
+  const WEEKS = [
+    {start:'2026-08-10', title:'10–16 августа', tag:'разгрузка · велогонка отменена',
+     days:[
+      ['✅ Длинный 16,0 км — 1:43, ср. ЧСС 134, точно в коридоре','130–145','done'],
+      ['😴 Полный отдых — recovery time после длинной','—',''],
+      ['🏃 40 мин легко','125–140','watch'],
+      ['😴 Отдых','—',''],
+      ['🏃 40 мин легко','125–140','watch'],
+      ['😴 Отдых или 🚴 лёгкое вело 60–75 мин Z1–Z2 по желанию','&lt; 140',''],
+      ['🏃 Длинный <b>12–14 км</b> легко, по самочувствию','130–145','watch']],
+     note:'📌 Каденс на длинных — 170+, особенно в подъёмы (в пн был ~163). В вс вечером — автоплан пиковой недели.'},
+    {start:'2026-08-17', title:'17–23 августа', tag:'пиковая беговая · ЛФК и плавание возвращаются',
+     days:[
+      ['😴 Выходной','—',''],
+      ['🏃 45 мин легко + раскатки · 🧘 ЛФК · опц. 🏊','125–140',''],
+      ['🏃 <b>6 км в темпе ПМ</b> + 🚴 30–40 мин Z1 после','148–152',''],
+      ['🧘 ЛФК · опц. 🏊 плавание','—',''],
+      ['🏃 50 мин + 🚴 45–60 мин Z1–Z2','135–140',''],
+      ['🚴 45–60 мин Z1 или 😴 отдых','&lt; 120',''],
+      ['🏃 Длинный <b>18–19 км</b> + 🧃 репетиция гоночного питания','до 145–148','']],
+     note:'⚠ Ключевая неделя цикла: длинная 23.08 — репетиция питания на ПМ. Что не отработано здесь — на старте не пробуем. Тренировки встанут в часы после воскресного автоплана.'},
+    {start:'2026-08-24', title:'24–30 августа', tag:'подводка',
+     days:[
+      ['😴 Выходной','—',''],
+      ['🏃 40 мин легко · 🧘 ЛФК · опц. 🏊','125–140',''],
+      ['🏃 30 мин + 3×1 км в целевом ритме + 🚴 30–40 Z1 после','148–152',''],
+      ['🧘 ЛФК · опц. 🏊 плавание','—',''],
+      ['🏃 40 мин легко + 🚴 40–50 мин Z1–Z2','125–140',''],
+      ['🚴 45–60 мин Z2','125–140',''],
+      ['🏃 Длинный <b>13–14 км</b> легко','130–145','']],
+     note:'Объём снижается — форма сохраняется за счёт коротких отрезков в целевом ритме.'},
+    {start:'2026-08-31', title:'31 августа – 6 сентября', tag:'🏁 гоночная неделя',
+     days:[
+      ['😴 Выходной','—',''],
+      ['🏃 30 мин + 4×30″ ускорения · 🧘 ЛФК 10–12 мин','125–140',''],
+      ['🏃 20–25 мин суперлегко','&lt; 135',''],
+      ['😴 Отдых · опц. 🚴 20–30 мин Z1','—',''],
+      ['🏃 15–20 мин + 3 раскатки','—',''],
+      ['🏁 <b>ПОЛУМАРАФОН 21,1 км</b> · 🧃 гель на 12–14 км','148–152','race'],
+      ['🚶 Прогулка · опц. 🚴 30–40 мин Z1','—','']],
+     note:'🧃 Загрузка углеводами 8–10 г/кг в чт–пт. На старте — только отработанное на длинной 23.08.'}
+  ];
+  // Фазы марафонского блока (детализируются автопланом по ходу)
+  const PHASES = [
+    {start:'2026-09-07', end:'13.09', phase:'Восстановление', long:'3×30–40 мин легко', key:'🩸 сдать все анализы (ферритин-панель)'},
+    {start:'2026-09-14', end:'20.09', phase:'Переходная', long:'14–16 км', key:'Флеботомия №1 (если назначена) → неделя лёгкая'},
+    {start:'2026-09-21', end:'27.09', phase:'База 1', long:'20–22 км', key:'темповая 6 км (148–152)'},
+    {start:'2026-09-28', end:'04.10', phase:'База 2', long:'24 км', key:'темповая 8 км, питание на длинной'},
+    {start:'2026-10-05', end:'11.10', phase:'Разгрузка', long:'16 км', key:'контроль метрик, взвешивание'},
+    {start:'2026-10-12', end:'18.10', phase:'Пик 1', long:'26–28 км', key:'🧃 репетиция питания №1'},
+    {start:'2026-10-19', end:'25.10', phase:'Пик 2', long:'30–32 км', key:'🧃 генеральная репетиция, макс. объём'},
+    {start:'2026-10-26', end:'01.11', phase:'Подводка', long:'18–20 км', key:'последняя работа в темпе марафона'},
+    {start:'2026-11-02', end:'08.11', phase:'Taper', long:'—', key:'🏆 МАРАФОН 07–08.11'}
+  ];
+  const DAY_NAMES=['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
+  const ALL = WEEKS.map(w=>({type:'d', ...w})).concat(PHASES.map(p=>({type:'p', ...p})));
+  const today=new Date(); today.setHours(0,0,0,0);
+  function dstr(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+  function curIndex(){
+    for(let i=ALL.length-1;i>=0;i--){ if(new Date(ALL[i].start+'T00:00:00')<=today) return i; }
+    return 0;
+  }
+  let wi=curIndex();
+  function badge(b){
+    if(b==='done') return '<span class="badge ok">сделано</span>';
+    if(b==='watch') return '<span class="badge">⌚ в часах</span>';
+    if(b==='race') return '<span class="badge" style="background:var(--accent);color:#fff">🏁 старт</span>';
+    return '';
+  }
+  function render(){
+    const w=ALL[wi];
+    const isCur = wi===curIndex();
+    document.getElementById('wk-prev').disabled = wi===0;
+    document.getElementById('wk-next').disabled = wi===ALL.length-1;
+    if(w.type==='d'){
+      document.getElementById('wk-title').textContent='Неделя '+w.title;
+      document.getElementById('wk-sub').textContent=w.tag+(isCur?' · текущая':'');
+      const s=new Date(w.start+'T00:00:00');
+      let rows='';
+      for(let i=0;i<7;i++){
+        const d=new Date(s); d.setDate(s.getDate()+i);
+        const dd=String(d.getDate()).padStart(2,'0')+'.'+String(d.getMonth()+1).padStart(2,'0');
+        let cls='', mark='';
+        if(d.getTime()===today.getTime()){cls='today';mark='<span class="today-mark">СЕГОДНЯ</span>';}
+        else if(d<today){cls='past';}
+        const [txt,hr,b]=w.days[i];
+        rows+=`<tr class="${cls}"><td>${DAY_NAMES[i]} ${dd}${mark}</td><td${b==='done'?' class="done"':''}>${txt}</td><td class="num">${hr}</td><td>${badge(b)}</td></tr>`;
+      }
+      document.getElementById('wk-body').innerHTML=
+        `<table><thead><tr><th>День</th><th>Тренировка</th><th>Цель по ЧСС</th><th></th></tr></thead><tbody>${rows}</tbody></table>`;
+      document.getElementById('wk-note').textContent=w.note||'';
+    } else {
+      const s=new Date(w.start+'T00:00:00');
+      const dd=String(s.getDate()).padStart(2,'0')+'.'+String(s.getMonth()+1).padStart(2,'0');
+      document.getElementById('wk-title').textContent='Неделя '+dd+'–'+w.end;
+      document.getElementById('wk-sub').textContent='марафонский блок'+(isCur?' · текущая':'');
+      document.getElementById('wk-body').innerHTML=
+        `<table><tbody>
+          <tr><td>Фаза</td><td><b>${w.phase}</b></td></tr>
+          <tr><td>Длинный бег</td><td class="num">${w.long}</td></tr>
+          <tr><td>Ключевое</td><td>${w.key}</td></tr>
+        </tbody></table>`;
+      document.getElementById('wk-note').textContent='Детальный план по дням появится в воскресном автоплане перед началом этой недели.';
+    }
+  }
+  document.getElementById('wk-prev').addEventListener('click',()=>{if(wi>0){wi--;render();}});
+  document.getElementById('wk-next').addEventListener('click',()=>{if(wi<ALL.length-1){wi++;render();}});
+  document.getElementById('wk-today').addEventListener('click',()=>{wi=curIndex();render();});
+  render();
   // manual refresh: очистить кэш SW и перезагрузить
   document.getElementById('refresh').addEventListener('click', async ()=>{
     const btn=document.getElementById('refresh');
