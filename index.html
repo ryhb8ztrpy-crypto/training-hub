@@ -83,6 +83,14 @@
   .st.crit{color:var(--crit)}.st.crit .ic{background:var(--crit)}
 
   .done{color:var(--good-text);font-weight:600}
+  .pb-item{margin-bottom:14px}
+  .pb-item:last-child{margin-bottom:2px}
+  .pb-top{display:flex;justify-content:space-between;align-items:baseline;font-size:13px;font-weight:600;margin-bottom:6px}
+  .pb-days{color:var(--accent-deep);font-size:15px;font-variant-numeric:tabular-nums}
+  .pb-track{height:10px;border-radius:6px;background:var(--chip);overflow:hidden}
+  .pb-fill{height:100%;border-radius:6px;background:linear-gradient(90deg,var(--accent),var(--accent-deep));width:0;transition:width .8s ease}
+  .pb-fill.gold{background:linear-gradient(90deg,#eda100,#eb6834)}
+  .pb-sub{font-size:11px;color:var(--muted);margin-top:4px}
   .wk-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:2px}
   .wk-navs{display:flex;gap:6px}
   .wk-nav{border:1px solid var(--border);background:var(--surface);color:var(--accent-deep);border-radius:8px;padding:4px 12px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit}
@@ -126,6 +134,19 @@
 
   <!-- ОБЗОР -->
   <section id="overview" class="show">
+    <div class="card">
+      <h2>До стартов</h2>
+      <div class="pb-item">
+        <div class="pb-top"><span>🏃 Полумарафон · 05.09</span><span class="pb-days" id="pb-hm-days"></span></div>
+        <div class="pb-track"><div class="pb-fill" id="pb-hm-fill"></div></div>
+        <div class="pb-sub" id="pb-hm-sub"></div>
+      </div>
+      <div class="pb-item">
+        <div class="pb-top"><span>🏆 Марафон, Самарканд · 07–08.11</span><span class="pb-days" id="pb-m-days"></span></div>
+        <div class="pb-track"><div class="pb-fill gold" id="pb-m-fill"></div></div>
+        <div class="pb-sub" id="pb-m-sub"></div>
+      </div>
+    </div>
     <div class="card">
       <h2>Календарь стартов</h2>
       <div class="races">
@@ -272,6 +293,29 @@
     else if(diff===0) el.textContent='сегодня!';
     else el.textContent='прошло';
   });
+  // прогресс-бары до стартов (старт цикла подготовки — 27.07.2026)
+  (function(){
+    const t=new Date(); t.setHours(0,0,0,0);
+    const S=new Date('2026-07-27T00:00:00');
+    function days(a,b){return Math.round((b-a)/86400000);}
+    function rus(n){
+      const m=Math.abs(n)%100, d=m%10;
+      if(m>=11&&m<=14) return n+' дней';
+      if(d===1) return n+' день';
+      if(d>=2&&d<=4) return n+' дня';
+      return n+' дней';
+    }
+    function bar(race, fillId, daysId, subId){
+      const total=days(S,race), gone=Math.min(Math.max(days(S,t),0),total);
+      const left=days(t,race);
+      const pct=Math.round(gone/total*100);
+      document.getElementById(fillId).style.width=Math.min(pct,100)+'%';
+      document.getElementById(daysId).textContent= left>0 ? 'осталось '+rus(left) : (left===0?'СЕГОДНЯ! 🏁':'финишировано ✅');
+      document.getElementById(subId).textContent='подготовка: '+pct+'% пути пройдено ('+gone+' из '+total+' дней цикла)';
+    }
+    bar(new Date('2026-09-05T00:00:00'),'pb-hm-fill','pb-hm-days','pb-hm-sub');
+    bar(new Date('2026-11-07T00:00:00'),'pb-m-fill','pb-m-days','pb-m-sub');
+  })();
   // ===== Недели: автопереключение по дате + листание =====
   // Детальные недели (обновляются воскресным автопланом). d: [текст, ЧСС, бейдж]
   const WEEKS = [
