@@ -1,6 +1,6 @@
 // Training Hub service worker
 // CACHE_VERSION bump = принудительное обновление у всех клиентов
-const CACHE_VERSION = 'th-v2026-09-03';
+const CACHE_VERSION = 'th-v2026-09-05';
 const ASSETS = [
   './',
   './index.html',
